@@ -1,3 +1,8 @@
-update 09/26/2019
+# SmartBrain-api - v1
+Final project for Udemy course
 
-this server is already update and wait to sync heroku
+1. Clone this repo
+2. Run `npm install`
+3. Run `npm start`
+
+** Make sure you use postgreSQL instead of mySQL for this code base.
