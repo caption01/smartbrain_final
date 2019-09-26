@@ -10,11 +10,6 @@ import FaceRecognition from './component/FaceRecognition/FaceRecognition';
 import './App.css';
 import 'tachyons';
 
-import Clarifai from 'clarifai';
-
-const app = new Clarifai.App({
-  apiKey: 'ae17b1eea2bb427abbb98e2ca41dd85a'
- });
 
 const particlesOption = {
   
@@ -33,12 +28,8 @@ const particlesOption = {
 
 }
 
-class App extends Component {
-
-  constructor(){
-    super();
-    this.state = {
-      input: '',
+const initialStage = {
+  input: '',
       imageUrl: '',
       box: {},
       route: 'signin',
@@ -51,8 +42,13 @@ class App extends Component {
          entries: 0,
          joined: ''
       }
-    }
-    
+}
+
+class App extends Component {
+
+  constructor(){
+    super();
+    this.state = initialStage;
   }
 
     
@@ -63,8 +59,14 @@ class App extends Component {
   onButtonClick = () => {
     
     this.setState({imageUrl: this.state.input});
-
-    app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
+    fetch('http://localhost:3000/imageUrl', {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        input: this.state.input
+      })
+    })
+    .then(response => response.json())
     .then(response => {
       fetch('http://localhost:3000/image', {
         method: 'put',
@@ -73,11 +75,11 @@ class App extends Component {
           id: this.state.user.id
         })
       })
-      .then(response => response.json())
-      .then(count => {
-        this.setState(Object.assign(this.state.user, { entries: count }))
-      })
-
+        .then(response => response.json())
+        .then(count => {
+          this.setState(Object.assign(this.state.user, { entries: count }))
+        })
+        .catch(error => console.log('error in onclick'))
       this.displayFaceBox(this.calculateFaceLocation(response))
     })
     .catch(error => console.log(error))
@@ -108,12 +110,11 @@ class App extends Component {
   onRouteChange = (route) => {
     if(route === 'home'){
       this.setState({isSignedIn: true})
-    } else {
-      this.setState({isSignedIn: false})
-    }
-
+    } else if (route === 'signin') {
+      this.setState(initialStage)
+    } 
     this.setState({route: route})
-  }
+}
 
   loadUser = (data) => {
     this.setState({user: {
